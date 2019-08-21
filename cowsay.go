@@ -77,10 +77,10 @@ func calculateMaxWidth(lines []string) int {
 // setNewLine take a slice of strings and split the string
 // based on the maximum width
 // then return the slice of splitted string
-func setNewLine(lines []string, maxwidth int) []string {
+func setNewLine(lines []string, maxWidth int) []string {
 	var newLines []string
 	for _, l := range lines {
-		if len(l) > maxwidth {
+		if len(l) > maxWidth {
 			sub := ""
 
 			runes := bytes.Runes([]byte(l))
@@ -88,7 +88,7 @@ func setNewLine(lines []string, maxwidth int) []string {
 
 			for i, r := range runes {
 				sub = sub + string(r)
-				if (i+1)%maxwidth == 0 {
+				if (i+1)%maxWidth == 0 {
 					if runes[i+1] != rune(' ') && runes[i] != rune(' ') {
 						sub = sub + "-"
 					}
@@ -107,7 +107,7 @@ func setNewLine(lines []string, maxwidth int) []string {
 }
 
 // Generate the cow
-func generateCow(text string, maxWidth int) string {
+func generateCow(text string, width int) string {
 	lines := []string{fmt.Sprint(text)}
 
 	var cow = `     \  ^__^
@@ -117,7 +117,7 @@ func generateCow(text string, maxWidth int) string {
 	        ||     ||
 		`
 
-	lines = setNewLine(lines, maxWidth)
+	lines = setNewLine(lines, width)
 	lines = tabsToSpaces(lines)
 	maxWidth := calculateMaxWidth(lines)
 	messages := normalizeStringsLength(lines, maxWidth)
