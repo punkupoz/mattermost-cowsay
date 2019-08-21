@@ -1,4 +1,4 @@
-module github.com/punkupoz/cowsay
+module github.com/punkupoz/mattermost-cowsay
 
 go 1.12
 
