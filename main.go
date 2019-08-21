@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
+	"fmt"
 
-	//"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -13,58 +12,44 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"gopkg.in/yaml.v2"
-	//"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+)
+
+var (
+	PORT = 8080
 )
 
 type server struct {
-	//db *gorm.DB
+	db *gorm.DB
 	router *chi.Mux
 	config *Config
 }
 
-type Config struct {
-	Mattermost struct{
-		Token string
-	}
-}
-
-// loadConfig receive a path and return config object
-func loadConfig(path string) (*Config, error) {
-	var config Config
-	configFile, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	err = yaml.Unmarshal([]byte(configFile), &config)
-	if err != nil {
-		return nil, err
-	}
-	return &config, nil
-}
-
-func newServer() *server {
+func main() {
 	r := chi.NewRouter()
-	config, err := loadConfig("./conf.yaml")
+	db, err := gorm.Open("sqlite3", "data.db")
+	if err != nil {
+		log.Fatalf("error connecting to database: %v", err)
+	}
+
+	config, err := loadConfigFile()
 	if err != nil {
 		log.Fatalf("unable to load config: %v", err)
 	}
 
-	srv := server{
+	s := &server{
+		db: db,
 		router: r,
 		config: config,
 	}
+	s.routes()
+	if err := s.MigrateDb(); err != nil {
+		log.Fatalf("unable to init db: %v", err)
+	}
 
-	srv.routes()
-
-	return &srv
-}
-
-func main() {
-	s := newServer()
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", PORT),
 		Handler: s.router,
 	}
 
