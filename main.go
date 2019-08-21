@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
@@ -21,32 +20,28 @@ var (
 )
 
 type server struct {
-	db *gorm.DB
+	repo *Repo
 	router *chi.Mux
 	config *Config
 }
 
 func main() {
 	r := chi.NewRouter()
-	db, err := gorm.Open("sqlite3", "data.db")
+	repo, err := newRepo("sqlite3", "data.db")
 	if err != nil {
 		log.Fatalf("error connecting to database: %v", err)
 	}
-
 	config, err := loadConfigFile()
 	if err != nil {
 		log.Fatalf("unable to load config: %v", err)
 	}
 
 	s := &server{
-		db: db,
+		repo: repo,
 		router: r,
 		config: config,
 	}
 	s.routes()
-	if err := s.MigrateDb(); err != nil {
-		log.Fatalf("unable to init db: %v", err)
-	}
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", PORT),

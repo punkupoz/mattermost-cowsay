@@ -31,22 +31,15 @@ func (s *server) handleCowsay() http.HandlerFunc {
 			panic(err)
 		}
 		token := r.Form.Get("token")
-		userId := r.Form.Get("user_id")
 		text := r.Form.Get("text")
-
-		activity := &ActivityLog{
-			UserID: userId,
-			Message: text,
-		}
 
 		if token != s.config.Mattermost.Token {
 			http.Error(w, "UNAUTHORIZED", http.StatusUnauthorized)
-			activity.Success = false
-			s.db.Create(activity)
+			_ = s.repo.createLog(&r.Form, false)
 			return
 		}
 
-		res, err := prepareResponseMatter(generateCow(text), "in_channel")
+		res, err := prepareResponseMatter(generateCow(text, 30), "in_channel")
 		if err != nil {
 			panic(err)
 		}
@@ -54,13 +47,11 @@ func (s *server) handleCowsay() http.HandlerFunc {
 		_, err = w.Write(res);
 		if err != nil {
 			http.Error(w, "INTERNAL_SERVER_ERROR", http.StatusInternalServerError)
-			activity.Success = false
-			s.db.Create(activity)
+			_ = s.repo.createLog(&r.Form, false)
 			return
 		}
 
-		activity.Success = true
-		s.db.Create(activity)
+		_ = s.repo.createLog(&r.Form, true)
 	}
 }
 

@@ -107,7 +107,7 @@ func setNewLine(lines []string, maxwidth int) []string {
 }
 
 // Generate the cow
-func generateCow(text string) string {
+func generateCow(text string, maxWidth int) string {
 	lines := []string{fmt.Sprint(text)}
 
 	var cow = `     \  ^__^
@@ -117,7 +117,7 @@ func generateCow(text string) string {
 	        ||     ||
 		`
 
-	lines = setNewLine(lines, 30)
+	lines = setNewLine(lines, maxWidth)
 	lines = tabsToSpaces(lines)
 	maxWidth := calculateMaxWidth(lines)
 	messages := normalizeStringsLength(lines, maxWidth)

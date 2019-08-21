@@ -1,22 +1,18 @@
 package main
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/go-chi/chi"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/go-chi/chi"
 	"strings"
+	"testing"
 )
 
 func TestHandleCow(t *testing.T) {
 	assert := assert.New(t)
-	db, err := gorm.Open("sqlite3", "data.db")
-	if err != nil {
-		panic(err)
-	}
+	repo, _ := newRepo("sqlite3", "test.db")
 	srv := server{
 		config: &Config{
 			Mattermost: Mattermost{
@@ -24,7 +20,7 @@ func TestHandleCow(t *testing.T) {
 			},
 		},
 		router: chi.NewRouter(),
-		db: db,
+		repo: repo,
 	}
 	srv.routes()
 
